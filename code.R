@@ -10,9 +10,13 @@ tensorflow::use_python("C:\\ProgramData\\Anaconda3\\python.exe")
 if(!require(data.table)) install.packages('data.table')
 if(!require(dplyr)) install.packages('dplyr')
 if(!require(tensorflow)) install.packages("tensorflow")
+
 require(data.table)
 require(dplyr)
 require(tensorflow)
+
+setwd('C:\\Users\\moon\\Desktop\\dacon')
+list.files('data')
 
 pre_season = fread('data/Pre_Season_Batter.csv', encoding = 'UTF-8')
 regular_season = fread('data/Regular_Season_Batter.csv', encoding = 'UTF-8')
@@ -26,8 +30,19 @@ pre_season = pre_season %>% filter(batter_id %in% target_batter_id)
 regular_season = regular_season %>% filter(batter_id  %in% target_batter_id)
 regular_day = regular_day %>% filter(batter_id %in% target_batter_id)
 
+### predict
 input_dim = 13L
 output_dim = 1L
+
+data_scale_function = function(x)
+{
+  x_return = x %>% select(AB:GDP) 
+  x_return_scaled = x_return %>% scale() %>% as.matrix()
+  attr(x_return_scaled, 'scaled:center') = NULL
+  attr(x_return_scaled, 'scaled:scale') = NULL
+  x_return_scaled[is.nan(x_return_scaled)] = x_return[is.nan(x_return_scaled)]
+  return(x_return_scaled)
+}
 
 opt_prediction_model = function(batter_inx, hidden_dim1, hidden_dim2, max_iter = 1000L, learning_rate = 0.005)
 {
@@ -44,12 +59,11 @@ opt_prediction_model = function(batter_inx, hidden_dim1, hidden_dim2, max_iter =
   
   if(all(names(tmp_regular_day_list) == tmp_regular_season$year) & length(tmp_regular_day_list) > 2) 
   {
-    tmp_regular_day_list = lapply(tmp_regular_day_list, function(x) 
-      x %>% select(AB:GDP) %>% as.matrix())
+    tmp_regular_day_list = lapply(tmp_regular_day_list, data_scale_function)
     # print('No Problem!')
   }else{
     # print('Error in Batter Number: ', batter_inx)
-    return(NaN)
+    return(list(predicted_test_y = NaN, true_y = NaN))
   }
   
   input_x = tf$placeholder(tf$float32, shape(NULL, input_dim))
@@ -62,13 +76,13 @@ opt_prediction_model = function(batter_inx, hidden_dim1, hidden_dim2, max_iter =
   
   hidden_theta2 = tf$Variable(tf$random_normal(shape(hidden_dim1, hidden_dim2)))
   hidden_bias2 = tf$Variable(tf$random_normal(shape(hidden_dim2)))
-  hidden_layer2 = tf$reduce_max(tf$matmul(hidden_layer1, hidden_theta2) + hidden_bias2)
+  hidden_layer2 = tf$reshape(tf$reduce_mean(tf$matmul(hidden_layer1, hidden_theta2) + hidden_bias2, axis = 0L), shape(hidden_dim2, 1L))
   
-  hidden_theta3 = tf$Variable(tf$random_normal(shape()))
+  hidden_theta3 = tf$Variable(tf$random_normal(shape(1L, hidden_dim2)))
   hidden_bias3 = tf$Variable(tf$random_normal(shape()))
   hidden_theta3_y = tf$Variable(tf$random_normal(shape()))
   
-  predicted_y =  tf$multiply(hidden_layer2, hidden_theta3) + hidden_theta3_y * input_y + hidden_bias3
+  predicted_y =  tf$matmul(hidden_theta3, hidden_layer2) + hidden_theta3_y * input_y + hidden_bias3
   objective_fun = tf$reduce_sum((output_y - predicted_y)^2)
   
   train_opt = tf$train$AdamOptimizer(learning_rate = learning_rate)$minimize(objective_fun)
