@@ -141,7 +141,7 @@ for(epoch in seq_len(3000)){
   txt <- sprintf("%s Epoch: %d. Average cost %f ", date(), epoch, total_cost)
   print(txt)
   
-  if(epoch == seq_len(1000)) pred_Y <- accuracy[[3]]
+  if(epoch == seq_len(3000)) pred_Y <- accuracy[[3]]
 }
 
 #### 191 observation's OPS is NA!
