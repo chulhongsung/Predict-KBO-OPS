@@ -86,17 +86,12 @@ opt_prediction_model = function(batter_inx, hidden_dim1, hidden_dim2, max_iter =
                                            output_y = tmp_regular_season$OPS[dict_iter + 1]))
     }
   }
-  # test_loss_val = sess$run(objective_fun, feed_dict = dict(input_x = tmp_regular_day_list[[max_dict_iter + 1]],
-  #                                                          input_y = tmp_regular_season$OPS[dict_iter + 1],
-  #                                                          output_y = tmp_regular_season$OPS[max_dict_iter + 2]))
-  
   predicted_test_y = sess$run(predicted_y, feed_dict = dict(input_x = tmp_regular_day_list[[max_dict_iter + 1]],
                                                             input_y = tmp_regular_season$OPS[max_dict_iter + 1]))
   true_y = tmp_regular_season$OPS[max_dict_iter + 2]
   sess$close()
   
   return(list(predicted_test_y = predicted_test_y, true_y = true_y))
-  # return(list(predicted_test_y = predicted_test_y, true_y = true_y, test_loss_val = test_loss_val))
 }
 
 predicted_ops_list = vector('list', length(target_batter_id))
