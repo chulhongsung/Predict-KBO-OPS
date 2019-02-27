@@ -150,7 +150,7 @@ test_pred_Y <- sess$run(hypothesis, feed_dict = dict(X = test_mat[-191,]))
 View(cbind(test_pred_Y, test_y[-191,2]))
 
 #### MSE
-sum((test_pred_Y - test_y[-191,2])^2) %>% sqrt()
+mean((test_pred_Y - test_y[-191,2])^2) %>% sqrt()
 
 #### Test WRMSE 
 cat( "TEST WRMSE:", sess$run(cost, feed_dict = dict(X = test_mat[-191,], Y = data.matrix(test_y[-191,2]), AB = data.matrix(test_y[-191,1]))))
