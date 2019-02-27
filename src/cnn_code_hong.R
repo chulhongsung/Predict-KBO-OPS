@@ -1,19 +1,18 @@
 rm(list = ls())
 gc(reset = TRUE)
 
-library(tidyverse)
-library(data.table)
-library(tensorflow)
+if(!require(tidyverse)) install.packages('tidyverse')
+if(!require(data.table)) install.packages('data.table')
+if(!require(tensorflow)) install.packages('tensorflow')  
+require(tidyverse)
+require(data.table)
+require(tensorflow)
 
 options(warn = -1, tibble.width = Inf)
 
-setwd("C:\\Users\\UOS\\Desktop\\dacon\\data")
-
-pre <- fread('Pre_Season_Batter.csv', encoding = 'UTF-8') %>% as.tibble
-
-rsb <- fread('Regular_Season_Batter.csv', encoding = 'UTF-8') %>% as.tibble
-
-dbd <- fread('Regular_Season_Batter_Day_by_Day.csv', encoding = 'UTF-8') %>% as.tibble
+pre <- fread('data/Pre_Season_Batter.csv', encoding = 'UTF-8') %>% as.tibble
+rsb <- fread('data/Regular_Season_Batter.csv', encoding = 'UTF-8') %>% as.tibble
+dbd <- fread('data/Regular_Season_Batter_Day_by_Day.csv', encoding = 'UTF-8') %>% as.tibble
 
 #### train data
 
@@ -134,24 +133,24 @@ sess$run(tf$global_variables_initializer())
 
 for(epoch in seq_len(3000)){
   
-  dict_value <- dict(X = train_matrix[-194,], Y = data.matrix(train_y[-194,2]), AB = data.matrix(train_y[-194,1]))
+  dict_value <- dict(X = train_mat[-194,], Y = data.matrix(train_y[-194,2]), AB = data.matrix(train_y[-194,1]))
   accuracy <- sess$run(list(cost, optimizer, hypothesis), feed_dict = dict_value)
   
   total_cost <- accuracy[[1]]
-  txt <- sprintf("%s Epoch: %d. Average cost %f ", date(), epoch, total_cost)
-  print(txt)
+  # txt <- sprintf("%s Epoch: %d. Average cost %f ", date(), epoch, total_cost)
+  # print(txt)
   
   if(epoch == seq_len(3000)) pred_Y <- accuracy[[3]]
 }
 
 #### 191 observation's OPS is NA!
-test_pred_Y <- sess$run(hypothesis, feed_dict = dict(X = test_mat[-191,], Y = data.matrix(test_y[-191,2]), AB = data.matrix(test_y[-191,1])))
+test_pred_Y <- sess$run(hypothesis, feed_dict = dict(X = test_mat[-191,]))
 
 #### Compare with real test OPS 
 View(cbind(test_pred_Y, test_y[-191,2]))
 
 #### MSE
-sum((test_pred_Y - test_y[-191,2]) * (test_pred_Y - test_y[-191,2])) / length(test_pred_Y)
+sum((test_pred_Y - test_y[-191,2])^2) %>% sqrt()
 
 #### Test WRMSE 
 cat( "TEST WRMSE:", sess$run(cost, feed_dict = dict(X = test_mat[-191,], Y = data.matrix(test_y[-191,2]), AB = data.matrix(test_y[-191,1]))))
