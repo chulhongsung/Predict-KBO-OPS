@@ -50,20 +50,20 @@ rsb_sh_y <- dbd_sh %>% group_by(batter_id, batter_name, year) %>%
 batter_id_2017 <- rsb_fh_x %>% filter(year == 2017) %>% distinct(batter_id) %>% pull(batter_id) 
 
 # season은 'pre:프리시즌', 'fh:전반기', 'sh:후반기'을 나타내는 변수.
-tmp_x_fh <- rsb_fh_x %>% filter((batter_id %in% batter_id_2017) & (year %in% 2005:2016)) %>% mutate(season = 'fh')
+train_x_fh <- rsb_fh_x %>% filter((batter_id %in% batter_id_2017) & (year %in% 2005:2016)) %>% mutate(season = 'fh')
 
-tmp_x_sh <- rsb_sh_x %>% filter((batter_id %in% batter_id_2017) & (year %in% 2005:2016)) %>% mutate(season = 'sh')
+train_x_sh <- rsb_sh_x %>% filter((batter_id %in% batter_id_2017) & (year %in% 2005:2016)) %>% mutate(season = 'sh')
 
-tmp_x_pre <- pre %>% filter((batter_id %in% batter_id_2017) & (year %in% 2005:2016)) %>% mutate(season = 'pre')
+train_x_pre <- pre %>% filter((batter_id %in% batter_id_2017) & (year %in% 2005:2016)) %>% mutate(season = 'pre')
 
-tmp_x <- tmp_x_fh %>% bind_rows(tmp_x_sh, tmp_x_pre)
+tmp_train_x <- train_x_fh %>% bind_rows(train_x_sh, train_x_pre)
 
-tmp_x_frame <- tibble(batter_id = rep(batter_id_2017, each = 36),
+tmp_train_frame <- tibble(batter_id = rep(batter_id_2017, each = 36),
                 year = rep(rep(2005:2016, each = 3),length(batter_id_2017)),
                 season = rep(rep(c('pre', 'fh', 'sh'), 12), length(batter_id_2017)))
 
-train_x <- tmp_x_frame %>% 
-  left_join(tmp_x, by = c('batter_id', 'year', 'season')) %>% 
+train_x <- tmp_train_frame %>% 
+  left_join(tmp_train_x, by = c('batter_id', 'year', 'season')) %>% 
   select(-c(1:4))
 
 # colnames(train_x)
@@ -77,3 +77,39 @@ train_mat <- matrix(c(t(as.matrix(train_x))), nrow = 174, byrow = TRUE)
 train_y <- rsb_fh_y %>% filter((batter_id %in% batter_id_2017) & (year == 2017)) %>% select(batter_id, OPS) %>% pull(OPS)
 
 #### test 데이터 만들기.
+
+batter_id_2018 <- rsb_fh_x %>% filter(year == 2018) %>% distinct(batter_id) %>% pull(batter_id) 
+
+test_x_fh <- rsb_fh_x %>% filter((batter_id %in% batter_id_2018) & (year %in% 2006:2017)) %>% mutate(season = 'fh')
+
+test_x_sh <- rsb_sh_x %>% filter((batter_id %in% batter_id_2018) & (year %in% 2006:2017)) %>% mutate(season = 'sh')
+
+test_x_pre <- pre %>% filter((batter_id %in% batter_id_2018) & (year %in% 2006:2017)) %>% mutate(season = 'pre')
+
+tmp_test_x <- test_x_fh %>% bind_rows(test_x_sh, test_x_pre)
+
+tmp_test_frame <- tibble(batter_id = rep(batter_id_2018, each = 36),
+                      year = rep(rep(2006:2017, each = 3),length(batter_id_2018)),
+                      season = rep(rep(c('pre', 'fh', 'sh'), 12), length(batter_id_2018)))
+
+test_x <- tmp_test_frame %>% 
+  left_join(tmp_test_x, by = c('batter_id', 'year', 'season')) %>% 
+  select(-c(1:4))
+
+test_x <- apply(test_x, 2, function(x) ifelse(is.na(x), 0, x)) %>% as.tibble() # NA를 0으로 대체.
+
+# 아래의 코드는 이전 코드에서 for loop을 통한 선수들의 년도별로 나누어진 데이터를 하나의 행으로 만드는 코드를 수정.
+test_mat <- matrix(c(t(as.matrix(test_x))), nrow = 202, byrow = TRUE) 
+
+test_y <- rsb_fh_y %>% filter((batter_id %in% batter_id_2018) & (year == 2018)) %>% select(batter_id, OPS) %>% pull(OPS)
+
+# NaN인 선수 빼기
+
+train_x <- train_mat
+train_y <- train_y
+test_x <- test_mat[-182,]
+test_y <- test_y
+
+#### 저장하기
+
+save(train_x, train_y, test_x, test_y, file = 'cnn_data.Rdata')
