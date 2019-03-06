@@ -7,7 +7,10 @@ if(!require(tensorflow)) install.packages('tensorflow'); require(tensorflow)
 
 options(warn = -1, tibble.width = Inf)
 
-setwd('C:\\Users\\UOS\\Desktop\\dacon')
+if(Sys.getenv('USERNAME') == 'UOS') setwd('C:\\Users\\UOS\\Desktop\\dacon')
+if(Sys.getenv('USERNAME') == 'moon') setwd('D:\\Project\\git\\Predict-KBO-OPS\\src')
+if(Sys.getenv('USERNAME') == 'kyucheol') setwd('C:\\Users\\kyucheol\\Dropbox\\dacon')
+
 
 pre_tmp <- fread('data/Pre_Season_Batter.csv', encoding = 'UTF-8') %>% as.tibble
 rsb <- fread('data/Regular_Season_Batter.csv', encoding = 'UTF-8') %>% as.tibble
