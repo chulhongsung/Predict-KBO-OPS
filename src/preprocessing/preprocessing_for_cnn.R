@@ -7,10 +7,7 @@ if(!require(tensorflow)) install.packages('tensorflow'); require(tensorflow)
 
 options(warn = -1, tibble.width = Inf)
 
-if(Sys.getenv('USERNAME') == 'UOS') setwd('C:\\Users\\UOS\\Desktop\\dacon')
-if(Sys.getenv('USERNAME') == 'moon') setwd('D:\\Project\\git\\Predict-KBO-OPS\\src')
-if(Sys.getenv('USERNAME') == 'kyucheol') setwd('C:\\Users\\kyucheol\\Dropbox\\dacon')
-
+setwd('C:\\Users\\UOS\\Desktop\\dacon')
 
 pre_tmp <- fread('data/Pre_Season_Batter.csv', encoding = 'UTF-8') %>% as.tibble
 rsb <- fread('data/Regular_Season_Batter.csv', encoding = 'UTF-8') %>% as.tibble
@@ -39,13 +36,13 @@ dbd_sh <- dbd %>% filter(date > criterion) # 후반기 데이터
 rsb_fh_x <- dbd_fh %>% group_by(batter_id, batter_name, year) %>% summarise_at(colnames(.)[c(7:20)], funs(sum)) %>% ungroup()
 
 rsb_fh_y <- dbd_fh %>% group_by(batter_id, batter_name, year) %>% 
-  summarise(OBP = (sum(H) + sum(BB) + sum(HBP))/(sum(AB) + sum(BB) + sum(HBP)), SLG = (sum(`1B`) + sum(`2B`)*2 + sum(`3B`)*3 + sum(HR)*4)/sum(AB)) %>% 
+  summarise(OBP = (sum(H) + sum(BB) + sum(HBP))/(sum(AB) + sum(BB) + sum(HBP)), SLG = (sum(`1B`) + sum(`2B`)*2 + sum(`3B`)*3 + sum(HR)*4)/sum(AB), AB = sum(AB)) %>% 
   mutate(OPS = OBP + SLG) %>% ungroup()
 
 rsb_sh_x <- dbd_sh %>% group_by(batter_id, batter_name, year) %>% summarise_at(colnames(.)[7:20], funs(sum)) %>% ungroup()
 
 rsb_sh_y <- dbd_sh %>% group_by(batter_id, batter_name, year) %>% 
-  summarise(OBP = (sum(H) + sum(BB) + sum(HBP))/(sum(AB) + sum(BB) + sum(HBP)), SLG = (sum(`1B`) + sum(`2B`)*2 + sum(`3B`)*3 + sum(HR)*4)/sum(AB)) %>% 
+  summarise(OBP = (sum(H) + sum(BB) + sum(HBP))/(sum(AB) + sum(BB) + sum(HBP)), SLG = (sum(`1B`) + sum(`2B`)*2 + sum(`3B`)*3 + sum(HR)*4)/sum(AB), AB = sum(AB)) %>% 
   mutate(OPS = OBP + SLG) %>% ungroup()
 
 #### train 데이터 만들기.
@@ -77,7 +74,7 @@ train_x <- apply(train_x, 2, function(x) ifelse(is.na(x), 0, x)) %>% as.tibble()
 # 아래의 코드는 이전 코드에서 for loop을 통한 선수들의 년도별로 나누어진 데이터를 하나의 행으로 만드는 코드를 수정.
 train_mat <- matrix(c(t(as.matrix(train_x))), nrow = 174, byrow = TRUE) 
 
-train_y <- rsb_fh_y %>% filter((batter_id %in% batter_id_2017) & (year == 2017)) %>% select(batter_id, OPS) %>% pull(OPS)
+train_y <- rsb_fh_y %>% filter((batter_id %in% batter_id_2017) & (year == 2017)) %>% select(batter_id, AB, OPS)
 
 #### test 데이터 만들기.
 
@@ -104,15 +101,16 @@ test_x <- apply(test_x, 2, function(x) ifelse(is.na(x), 0, x)) %>% as.tibble() #
 # 아래의 코드는 이전 코드에서 for loop을 통한 선수들의 년도별로 나누어진 데이터를 하나의 행으로 만드는 코드를 수정.
 test_mat <- matrix(c(t(as.matrix(test_x))), nrow = 202, byrow = TRUE) 
 
-test_y <- rsb_fh_y %>% filter((batter_id %in% batter_id_2018) & (year == 2018)) %>% select(batter_id, OPS) %>% pull(OPS)
+test_y <- rsb_fh_y %>% filter((batter_id %in% batter_id_2018) & (year == 2018)) %>% select(batter_id, AB, OPS) 
 
 # NaN인 선수 빼기
 
 train_x <- train_mat
 train_y <- train_y
 test_x <- test_mat[-182,]
-test_y <- test_y
+test_y <- test_y[-182,]
 
 #### 저장하기
 
 save(train_x, train_y, test_x, test_y, file = 'cnn_data.Rdata')
+getwd()
