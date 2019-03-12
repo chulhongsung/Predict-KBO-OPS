@@ -112,7 +112,7 @@ CNN_Ensemble <- function(train_x, train_y, test_x, test_y, n_filter, n_epoch, pr
     print(txt)
   }
   
-  hypothesis <- 0.4*pred_OPS_1 + 0.2*pred_OPS_2 + 0.2*pred_OPS_3 + 0.2*pred_OPS_4
+  hypothesis <- 0.25*pred_OPS_1 + 0.25*pred_OPS_2 + 0.25*pred_OPS_3 + 0.25*pred_OPS_4
   
   PRED_OPS <- sess$run(hypothesis, feed_dict = dict(X = test_x, keep_prob = 1.0))
   
