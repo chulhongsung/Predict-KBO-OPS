@@ -1,5 +1,5 @@
 ##############################################
-############# Random Forest ##################
+######## Random Forest & SVM #################
 ##############################################
 
 rm(list = ls())
@@ -17,6 +17,7 @@ require(randomForest)
 require(e1071)
 
 load('Rdata/data.Rdata')
+load('Rdata/cnn_data.Rdata')
 
 ### Random forest
 rf_model = randomForest(x = train_x, y = train_y$OPS, ntree = 5000)
