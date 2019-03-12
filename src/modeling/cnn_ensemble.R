@@ -1,12 +1,6 @@
 rm(list =ls())
 gc(reset = TRUE)
 
-if(!requireNamespace("superml")) install.packages("superml")
-
-require(tidyverse)
-require(tensorflow)
-require(superml)
-
 if(Sys.getenv('USERNAME') == 'UOS') setwd('C:\\Users\\UOS\\Desktop\\dacon')
 if(Sys.getenv('USERNAME') == 'moon') setwd('D:\\Project\\git\\Predict-KBO-OPS\\src')
 if(Sys.getenv('USERNAME') == 'kyucheol') setwd('C:\\Users\\kyucheol\\Dropbox\\dacon')
@@ -18,7 +12,7 @@ load('cnn_data.Rdata')
 # dim(train_y) # 174 3
 # dim(test_x) # 201 504
 # dim(test_y) # 201 3
-colnames(train_y)
+
 #### Ensemble model
 
 #### CNN model
