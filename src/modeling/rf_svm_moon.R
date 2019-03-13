@@ -47,5 +47,3 @@ sqrt(sum((test_y$OPS - svm_model_predicted)^2 * test_y$AB )/sum(test_y$AB)) # te
 
 
 
-
-
