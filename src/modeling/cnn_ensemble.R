@@ -127,7 +127,7 @@ CNN_Ensemble <- function(train_x, train_y, test_x, test_y, n_filter, n_epoch, pr
   return(list(PRED_OPS = PRED_OPS, TEST_WRMSE = TEST_WRMSE))
 }
 
-fit_Ensemble <- CNN_Ensemble(train_x, train_y, test_x, test_y, n_filter = 4L, n_epoch = 2000, prob =  0.7, learning_rate =  0.001)
+fit_Ensemble <- CNN_Ensemble(train_x, train_y, test_x, test_y, n_filter = 5L, n_epoch = 2000, prob =  0.7, learning_rate =  0.001)
 
 fit_Ensemble$TEST_WRMSE # 0.1373999
 
