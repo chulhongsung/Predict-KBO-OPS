@@ -9,14 +9,11 @@ if(Sys.getenv('USERNAME') == 'UOS') setwd('C:\\Users\\UOS\\Desktop\\dacon')
 if(Sys.getenv('USERNAME') == 'moon') setwd('D:\\Project\\git\\Predict-KBO-OPS\\src')
 if(Sys.getenv('USERNAME') == 'kyucheol') setwd('C:\\Users\\kyucheol\\Dropbox\\dacon')
 
-if(!require(dplyr)) install.packages('dplyr')
-if(!require(randomForest)) install.packages('randomForest')
-if(!require(e1071)) install.packages('e1071')
-require(dplyr)
-require(randomForest)
-require(e1071)
+if(!require(dplyr)) install.packages('dplyr'); require(dplyr)
+if(!require(randomForest)) install.packages('randomForest'); require(randomForest)
+if(!require(e1071)) install.packages('e1071'); require(e1071)
 
-load('Rdata/data.Rdata')
+load('Rdata/initial_data.Rdata')
 load('Rdata/cnn_data.Rdata')
 
 ### Random forest
