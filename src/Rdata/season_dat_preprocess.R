@@ -118,7 +118,6 @@ train_season_x <- train_season_x %>% as.tibble()
 
 test_season_x <- test_season_x %>% as.tibble()
 
-save(train_season_x, file = 'C:/Users/kyucheol/Dropbox/dacon/dacon/train_season_x.Rdata')
-save(train_season_y, file = 'C:/Users/kyucheol/Dropbox/dacon/dacon/train_season_y.Rdata')
-save(test_season_x, file = 'C:/Users/kyucheol/Dropbox/dacon/dacon/test_season_x.Rdata')
-save(test_season_y, file = 'C:/Users/kyucheol/Dropbox/dacon/dacon/test_season_y.Rdata')
+save(train_season_x, train_season_y, test_season_x, test_season_y, file = 'season_data.Rdata')
+
+
