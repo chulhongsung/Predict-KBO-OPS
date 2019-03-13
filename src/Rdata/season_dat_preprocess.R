@@ -1,8 +1,18 @@
-rm(list = ls()); gc(reset = T)
-library(tidyverse)
-library(data.table)
+###########################################
+##### Preprocessing for season_data #######
+###########################################
 
-rsbd <- fread('file:///C:/Users/kyucheol/Dropbox/dacon/Regular_Season_Batter_Day_by_Day.csv', encoding = 'UTF-8') %>% as_tibble()
+rm(list = ls())
+gc(reset = TRUE)
+
+if(Sys.getenv('USERNAME') == 'UOS') setwd('C:\\Users\\UOS\\Desktop\\dacon')
+if(Sys.getenv('USERNAME') == 'moon') setwd('D:\\Project\\git\\Predict-KBO-OPS\\src')
+if(Sys.getenv('USERNAME') == 'kyucheol') setwd('C:\\Users\\kyucheol\\Dropbox\\dacon')
+
+if(!require(tidyverse)) install.packages('tidyverse'); require(tidyverse)
+if(!require(data.table)) install.packages('data.table'); require(data.table)
+
+rsbd <- fread('data/Regular_Season_Batter_Day_by_Day.csv', encoding = 'UTF-8') %>% as_tibble()
 
 # rsbd를 시즌별 rsb파일로 바꾸는 전처리
 
