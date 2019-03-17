@@ -42,7 +42,7 @@ wrmse_obj <- function(preds, dtrain){
 
 #### XGBOOST Parameters Tuning 
 
-best_param <- list()
+best_param_lag5 <- list()
 best_seednumber <- 1234
 best_wrmse <- Inf
 best_wrmse_index <- 0
@@ -84,7 +84,7 @@ for (iter in seq_len(100)){
     best_wrmse <- min_wrmse
     best_wrmse_index <- min_wrmse_index
     best_seednumber <- seed.number
-    best_param <- param
+    best_param_lag5 <- param
   }
   cat('Iter::', iter, '\n')
 }
@@ -105,4 +105,4 @@ pred_ops <- predict(xg_mod, dtest)
 
 test_wrmse <- (sum((pred_ops - lag5_test_data$t_OPS)^2 * lag5_test_data$t_AB) / sum(lag5_test_data$t_AB)) %>% sqrt() # 0.1257451
 
-save(best_param, file = 'xgb_best_param.Rdata' )
+save(best_param_lag5, file = 'xgb_best_param_lag5.Rdata')
