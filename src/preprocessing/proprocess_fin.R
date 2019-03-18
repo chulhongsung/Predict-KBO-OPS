@@ -51,8 +51,11 @@ rsbd_tmp <- rsbd_tmp %>% mutate(`1B` = H - `2B` - `3B` - `HR`) %>%
 
 # 시즌별 누적 출루율 장타율 ops
 rsbd_tmp_season <- rsbd_tmp %>% group_by(batter_id, year, season) %>% 
-  mutate(OBP = (cumsum(H)+cumsum(BB)+cumsum(HBP))/(cumsum(AB)+cumsum(BB)+cumsum(HBP)),  # +cumsum(SF) 분모에 이거 뺌.
-         SLG = (cumsum(`1B`)+ cumsum(`2B`)*2 + cumsum(`3B`)*3 + cumsum(HR)*4)/(cumsum(AB)),
+  mutate(AB = cumsum(AB), R = cumsum(R), H = cumsum(H), `1B` = cumsum(`1B`), `2B` = cumsum(`2B`),
+         `3B` = cumsum(`3B`), HR = cumsum(HR), RBI = cumsum(RBI), SB = cumsum(SB), CS = cumsum(CS),
+         BB = cumsum(BB), HBP = cumsum(HBP), SO = cumsum(SO), GDP = cumsum(GDP),
+         OBP = (H+BB+HBP)/(AB+BB+HBP),  # +cumsum(SF) 분모에 이거 뺌.
+         SLG = (`1B`+ `2B`*2 + `3B`*3 + HR*4)/(AB),
          OPS = OBP + SLG)
 
 aaa <- rsbd_tmp_season %>% group_by(batter_id, year, season) %>% summarise(date = max(date)) %>%
@@ -78,10 +81,10 @@ preprocess_fun <- function(dat = rsb_fh, annual = 12){
   ## annual : 분석하는데 쓰일 연차
   
   dat_tmp <- dat %>% select(c("batter_id","year","AB","R","H","2B","3B","HR","TB","RBI","SB","CS","BB","HBP","SO","GDP"))
- 
+  
   #### train data
   batter_id_2017 <- dat_tmp %>% filter(year == 2017) %>% group_by(batter_id) %>% distinct(batter_id) %>% ungroup()
-
+  
   tmp_train <- dat_tmp %>% filter(batter_id %in% batter_id_2017$batter_id, year %in% (2017-annual):2016) %>% arrange(batter_id)
   
   tmp_train <- tibble(batter_id = rep(unique(tmp_train$batter_id), each = annual), year = rep((2017-annual):2016, length(unique(tmp_train$batter_id)))) %>%
@@ -128,13 +131,13 @@ preprocess_fun <- function(dat = rsb_fh, annual = 12){
   tmp_test <- tmp_test %>% arrange(batter_id)
   
   names(tmp_test)[c(6,7)] <- c('B2','B3')
-
+  
   #### length(batter_id) * (1+annual*14) 의 행렬을 생성(즉, id, 그리고 나머지 14개변수 * annual년)
   test_x <- data.matrix(tmp_test[,-c(1,2)])
   
   test_x <- matrix(as.vector(t(test_x)), nrow = nrow(tmp_test)/annual, , byrow = T) %>% as.tibble()
   
-
+  
   names(test_x) <- x_name
   ##
   
