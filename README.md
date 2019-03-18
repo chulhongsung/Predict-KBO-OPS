@@ -1,5 +1,8 @@
-# Predict-KBO-OPS
-**Develope a model that predict OPS of each player**
+=================================
+Predict KBO OPS
+=================================
+
+Develope a model that predict OPS of each player
 
 **Contributors**
 
