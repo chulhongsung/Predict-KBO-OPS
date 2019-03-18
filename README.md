@@ -1,6 +1,6 @@
 # Predict-KBO-OPS
 
-Develope a model that predict OPS of each player
+**Develope a model that predict OPS of each player**
 ----
 
 * [`@Monster-Moon`](https://github.com/Monster-Moon)
