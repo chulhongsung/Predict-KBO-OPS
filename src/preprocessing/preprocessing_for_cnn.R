@@ -29,23 +29,26 @@ dbd = dbd_tmp %>%
   select(batter_id, batter_name, year, date, opposing_team, avg1, AB, R, H, `1B`, everything())
 
 criterion = 7.17 # 전반기, 후반기 기준 날짜.
-
 dbd_fh = dbd %>% filter(date <= criterion) # 전반기 데이터
-
 dbd_sh = dbd %>% filter(date > criterion) # 후반기 데이터
 
 #### 전반기, 후반기 데이터 합치기.
-
-rsb_fh_x = dbd_fh %>% group_by(batter_id, batter_name, year) %>% summarise_at(colnames(.)[c(7:20)], funs(sum)) %>% ungroup()
+rsb_fh_x = dbd_fh %>% group_by(batter_id, batter_name, year) %>% 
+  summarise_at(colnames(.)[c(7:20)], funs(sum)) %>% ungroup()
 
 rsb_fh_y = dbd_fh %>% group_by(batter_id, batter_name, year) %>% 
-  summarise(OBP = (sum(H) + sum(BB) + sum(HBP))/(sum(AB) + sum(BB) + sum(HBP)), SLG = (sum(`1B`) + sum(`2B`)*2 + sum(`3B`)*3 + sum(HR)*4)/sum(AB), AB = sum(AB)) %>% 
+  summarise(OBP = (sum(H) + sum(BB) + sum(HBP))/(sum(AB) + sum(BB) + sum(HBP)), 
+            SLG = (sum(`1B`) + sum(`2B`)*2 + sum(`3B`)*3 + sum(HR)*4)/sum(AB), 
+            AB = sum(AB)) %>% 
   mutate(OPS = OBP + SLG) %>% ungroup()
 
-rsb_sh_x = dbd_sh %>% group_by(batter_id, batter_name, year) %>% summarise_at(colnames(.)[7:20], funs(sum)) %>% ungroup()
+rsb_sh_x = dbd_sh %>% group_by(batter_id, batter_name, year) %>% 
+  summarise_at(colnames(.)[7:20], funs(sum)) %>% ungroup()
 
 rsb_sh_y = dbd_sh %>% group_by(batter_id, batter_name, year) %>% 
-  summarise(OBP = (sum(H) + sum(BB) + sum(HBP))/(sum(AB) + sum(BB) + sum(HBP)), SLG = (sum(`1B`) + sum(`2B`)*2 + sum(`3B`)*3 + sum(HR)*4)/sum(AB), AB = sum(AB)) %>% 
+  summarise(OBP = (sum(H) + sum(BB) + sum(HBP))/(sum(AB) + sum(BB) + sum(HBP)), 
+            SLG = (sum(`1B`) + sum(`2B`)*2 + sum(`3B`)*3 + sum(HR)*4)/sum(AB), 
+            AB = sum(AB)) %>% 
   mutate(OPS = OBP + SLG) %>% ungroup()
 
 #### train 데이터 만들기.
