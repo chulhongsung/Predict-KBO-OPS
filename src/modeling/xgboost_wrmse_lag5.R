@@ -99,7 +99,7 @@ lag5_test_x <- lag5_test_data[,1:97]
 
 dtest <- xgb.DMatrix(data.matrix(lag5_test_x), info = list(label = lag5_test_data$t_OPS, weight = lag5_test_data$t_AB))
 
-xg_mod <- xgboost(data = dtrain, params = best_param, nround = nrounds, verbose = T)
+xg_mod <- xgboost(data = dtrain, params = best_param_lag5, nround = nrounds, verbose = T)
 
 pred_ops <- predict(xg_mod, dtest)
 
