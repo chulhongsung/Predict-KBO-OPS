@@ -29,32 +29,47 @@ rsb_fh_y = dbd_fh %>% group_by(batter_id, batter_name, year) %>%
   mutate(OPS = OBP + SLG) %>% ungroup()
 
 #### Lag 5 데이터 만들기.
-rsb <- rsb_tmp %>% select(1,2,3,5:20)
+rsb <- rsb_tmp %>% select(batter_id:year,avg:GDP)
 
 rsb_lag5 <- rsb %>%
   group_by(batter_id, batter_name) %>%
-  mutate_at(vars(colnames(.)[c(4:19)]), funs(lag1 = lag(., 1), lag2 = lag(., 2), lag3 = lag(., 3), lag4 = lag(., 4), lag5 = lag(., 5))) %>% 
+  mutate_at(vars('avg':'GDP'), funs(lag1 = lag(., 1), lag2 = lag(., 2), lag3 = lag(., 3), lag4 = lag(., 4), lag5 = lag(., 5))) %>% 
   ungroup()
 
 rsb_lag5 <- rsb_lag5 %>%
   mutate(t_year = year + 1) # year + 1 로 타겟이 되는 연도 변수 생성
 
-rsb_fh_OPS <- rsb_fh_y %>% select(1,2,3,6,7)
+rsb_fh_OPS <- rsb_fh_y %>% select(-OBP, -SLG)
 
 colnames(rsb_fh_OPS) <- c('batter_id', 'batter_name', 'year', 't_AB', 't_OPS')
 
 dataset <- rsb_lag5 %>% inner_join(rsb_fh_OPS, by = c('batter_id', 'batter_name', 't_year' = 'year')) # 타겟 변수인 OPS, AB 붙이기
 
-dataset <- dataset %>% select(1,4:99,101,102)
+dataset <- dataset %>% select(-batter_name, -year, -t_year)
 
 dataset <- apply(dataset, 2, function(x) ifelse(is.na(x), 0, x)) %>% as.tibble() # NA를 0으로 대체.
 
-#### Train, Test 7:3 비율로 나누기
+dataset <- dataset %>% mutate(submem = if_else(AB < 10, 1, 0)) # 10 타수 미만의 타자는 submem = 1
+
+dataset <- dataset %>% mutate(inx = row_number())
+
+#### Stratified Sampling Method 
+
+#### submem에 따라 고정된 비율로 sampling
+
 set.seed(526)
 
-inx <- sample(nrow(dataset), 7/10*nrow(dataset))
+lag5_train_data <- dataset %>% 
+  group_by(submem) %>% 
+  sample_frac(0.7) %>% 
+  ungroup()
 
-lag5_train_data <- dataset[inx,]
-lag5_test_data <- dataset[-inx,]
+train_inx <- lag5_train_data$inx
+
+lag5_test_data <- dataset[-train_inx,]
+
+lag5_train_data <- lag5_train_data %>% select(-inx)
+
+lag5_test_data <- lag5_test_data %>% select(-inx)
 
 save(lag5_train_data, lag5_test_data, file = 'lag5_data.Rdata')
