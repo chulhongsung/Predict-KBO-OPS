@@ -103,6 +103,6 @@ xg_mod <- xgboost(data = dtrain, params = best_param_lag5, nround = nrounds, ver
 
 pred_ops <- predict(xg_mod, dtest)
 
-test_wrmse <- (sum((pred_ops - lag5_test_data$t_OPS)^2 * lag5_test_data$t_AB) / sum(lag5_test_data$t_AB)) %>% sqrt() # 0.1257451
+test_wrmse <- (sum((pred_ops - lag5_test_data$t_OPS)^2 * lag5_test_data$t_AB) / sum(lag5_test_data$t_AB)) %>% sqrt() # 0.1335764
 
 save(best_param_lag5, file = 'xgb_best_param_lag5.Rdata')
