@@ -9,17 +9,17 @@ if(Sys.getenv('USERNAME') == 'UOS') setwd('C:\\Users\\UOS\\Desktop\\dacon')
 if(Sys.getenv('USERNAME') == 'moon') setwd('D:\\Project\\git\\Predict-KBO-OPS\\src')
 if(Sys.getenv('USERNAME') == 'kyucheol') setwd('C:\\Users\\kyucheol\\Dropbox\\dacon')
 
-if(!require(tidyverse)) install.packages('tidyverse')
-if(!require(xgboost)) install.packages('xgboost')
+if(!require(tidyverse)) install.packages('tidyverse'); library(tidyverse)
+if(!require(xgboost)) install.packages('xgboost'); library(xgboost)
 
-library(tidyverse)
-library(xgboost)
+#### Lag 5 
 
-load('lag5_data.Rdata')
+load('lag5_AB_data.Rdata')
 
 #### xgb.DMatrix
+lag5_train_data
 
-lag5_train_x <- lag5_train_data[,1:97]
+lag5_train_x <- lag5_train_data[,2:103]
 
 dtrain <- xgb.DMatrix(data.matrix(lag5_train_x),info = list(label = lag5_train_data$t_OPS, weight = lag5_train_data$t_AB))
 
@@ -47,9 +47,9 @@ best_seednumber <- 1234
 best_wrmse <- Inf
 best_wrmse_index <- 0
 
-set.seed(526)
+set.seed(1)
 
-for (iter in seq_len(100)){
+for (iter in seq_len(1000)){
   
   param <- list(booster = 'dart',
                 objective = wrmse_obj,
@@ -91,18 +91,20 @@ for (iter in seq_len(100)){
 
 #### Train XGBOOST Model With Best Parameters 
 
-nrounds <-  best_wrmse_index
+nrounds <- best_wrmse_index
 
 set.seed(best_seednumber)
 
-lag5_test_x <- lag5_test_data[,1:97]
+lag5_test_x <- lag5_test_data[,2:103]
 
 dtest <- xgb.DMatrix(data.matrix(lag5_test_x), info = list(label = lag5_test_data$t_OPS, weight = lag5_test_data$t_AB))
 
-xg_mod <- xgboost(data = dtrain, params = best_param, nround = nrounds, verbose = T)
+xg_mod <- xgboost(data = dtrain, params = best_param_lag5, nround = nrounds, verbose = T)
 
 pred_ops <- predict(xg_mod, dtest)
 
-test_wrmse <- (sum((pred_ops - lag5_test_data$t_OPS)^2 * lag5_test_data$t_AB) / sum(lag5_test_data$t_AB)) %>% sqrt() # 0.1257451
+wrmse(pred_ops, dtest) # 0.123459
+pred_ops[lag5_test_data$t_AB <= 8] <- 0
+cbind(pred_ops, lag5_test_data$t_AB, lag5_test_data$t_OPS)
 
 save(best_param_lag5, file = 'xgb_best_param_lag5.Rdata')
