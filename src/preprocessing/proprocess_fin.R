@@ -8,7 +8,6 @@ if(!require(tidyverse)) install.packages('tidyverse'); require(tidyverse)
 if(!require(data.table)) install.packages('data.table'); require(data.table)
 
 rsbd <- fread('data/Regular_Season_Batter_Day_by_Day.csv', encoding = 'UTF-8') %>% as_tibble()
-
 rsb <- fread('data/Regular_Season_Batter.csv', encoding = 'UTF-8') %>% as_tibble()
 
 # day by day 데이터가 같은날 같은선수가 두번 경기에 임한 경우도 있어서 아래를 꼭 돌려야합니다.
@@ -27,7 +26,6 @@ date_2 <- c(date_0, max(date_0))
 
 # 각 년도별 전반기 종료일, 주로 날씨에 영향을 받지 않는 한, 최대 2일 쉬기에, 4일이상 경기가 없다면 전반기 끝나는 날이라 생각하자.
 f_season_end <- date_1[which((((date_2 - date_1)>=0.04) & ((date_2 - date_1)< 0.6)) | ((date_2 - date_1) >= 0.9 & (date_2 - date_1) <= 1 ))] 
-
 f_season_end <- f_season_end[-3] # 이거는 2002년에 날짜가 두개나와서 실제 전반기종료일 찾아보니 3번째는 아닌여서 뺐다.
 
 rm(date_0, date_1, date_2)
@@ -99,7 +97,7 @@ preprocess_fun <- function(dat = rsb_fh, annual = 12){
   #### length(batter_id) * (1+annual*14) 의 행렬을 생성(즉, id, 그리고 나머지 14개변수 * annual년)
   train_x <- data.matrix(tmp_train[,-c(1,2)])
   
-  train_x <- matrix(as.vector(t(train_x)), nrow = nrow(tmp_train)/annual, , byrow = T) %>% as.tibble()
+  train_x <- matrix(as.vector(t(train_x)), nrow = nrow(tmp_train)/annual, byrow = T) %>% as.tibble()
   
   x_name <- NULL
   for(i in annual:1){
@@ -124,7 +122,8 @@ preprocess_fun <- function(dat = rsb_fh, annual = 12){
   
   tmp_test <- dat_tmp %>% filter(batter_id %in% batter_id_2018$batter_id, year %in% (2018-annual):2017) %>% arrange(batter_id)
   
-  tmp_test <- tibble(batter_id = rep(unique(tmp_test$batter_id), each = annual), year = rep((2018-annual):2017, length(unique(tmp_test$batter_id)))) %>% left_join(tmp_test, by = c('batter_id', 'year'))
+  tmp_test <- tibble(batter_id = rep(unique(tmp_test$batter_id), each = annual), year = rep((2018-annual):2017, length(unique(tmp_test$batter_id)))) %>% 
+    left_join(tmp_test, by = c('batter_id', 'year'))
   
   tmp_test <- apply(tmp_test, 2, function(x) ifelse(is.na(x), 0, x)) %>% as.tibble()
   
@@ -135,7 +134,7 @@ preprocess_fun <- function(dat = rsb_fh, annual = 12){
   #### length(batter_id) * (1+annual*14) 의 행렬을 생성(즉, id, 그리고 나머지 14개변수 * annual년)
   test_x <- data.matrix(tmp_test[,-c(1,2)])
   
-  test_x <- matrix(as.vector(t(test_x)), nrow = nrow(tmp_test)/annual, , byrow = T) %>% as.tibble()
+  test_x <- matrix(as.vector(t(test_x)), nrow = nrow(tmp_test)/annual, byrow = T) %>% as.tibble()
   
   
   names(test_x) <- x_name

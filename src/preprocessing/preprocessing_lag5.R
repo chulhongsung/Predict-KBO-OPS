@@ -25,7 +25,9 @@ dbd_fh = dbd %>% filter(date <= criterion) # 전반기 데이터
 
 #### 전반기 OPS 계산하기
 rsb_fh_y = dbd_fh %>% group_by(batter_id, batter_name, year) %>%
-  summarise(OBP = (sum(H) + sum(BB) + sum(HBP))/(sum(AB) + sum(BB) + sum(HBP)), SLG = (sum(`1B`) + sum(`2B`)*2 + sum(`3B`)*3 + sum(HR)*4)/sum(AB), AB = sum(AB)) %>%
+  summarise(OBP = (sum(H) + sum(BB) + sum(HBP))/(sum(AB) + sum(BB) + sum(HBP)),
+            SLG = (sum(`1B`) + sum(`2B`)*2 + sum(`3B`)*3 + sum(HR)*4)/sum(AB), 
+            AB = sum(AB)) %>%
   mutate(OPS = OBP + SLG) %>% ungroup()
 
 #### Lag 5 데이터 만들기.
@@ -33,7 +35,8 @@ rsb <- rsb_tmp %>% select(1,2,3,5:20)
 
 rsb_lag5 <- rsb %>%
   group_by(batter_id, batter_name) %>%
-  mutate_at(vars(colnames(.)[c(4:19)]), funs(lag1 = lag(., 1), lag2 = lag(., 2), lag3 = lag(., 3), lag4 = lag(., 4), lag5 = lag(., 5))) %>% 
+  mutate_at(vars(colnames(.)[c(4:19)]), funs(lag1 = lag(., 1), lag2 = lag(., 2), 
+                                             lag3 = lag(., 3), lag4 = lag(., 4), lag5 = lag(., 5))) %>% 
   ungroup()
 
 rsb_lag5 <- rsb_lag5 %>%
