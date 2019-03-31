@@ -1,4 +1,3 @@
-
 rm(list = ls())
 gc(reset = T)
 
@@ -9,6 +8,8 @@ if(!require(data.table)) install.packages('data.table'); library(data.table)
 if(!require(xgboost)) install.packages('xgboost'); library(xgboost)
 if(!require(randomForest)) install.packages('randomForest'); library(randomForest)
 if(!require(keras)) install.packages('keras'); library(keras)
+if(!require(readr)) install.packages('readr'); library(readr)
+
 
 #### Data load
 load('lag5_AB_data.Rdata')
@@ -199,5 +200,13 @@ pred_sheet <- pred_sheet %>%  mutate(pred_OPS = pred_XGB*0.4 + pred_DNN*0.3 + pr
 
 pred_sheet$pred_OPS <- pred_sheet$pred_OPS * if_else(as.numeric(submission_data$AB) < 5, 0, 1)
 
+#### Final submission 
+
 submission_OPS <- pred_sheet %>% select(batter_id, pred_OPS)
+
+submission_form <- fread('data/submission.csv', header = T, encoding = 'UTF-8') %>% as_tibble()
+
+submission_form <- submission_form %>% left_join(submission_OPS, by = 'batter_id')
+
+write_excel_csv(submission_form, 'final_submission.csv')
 
