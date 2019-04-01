@@ -9,6 +9,7 @@ Predict KBO OPS
 * [`@Monster-Moon`](https://github.com/Monster-Moon)
 * [`@chulhongsung`](https://github.com/chulhongsung)
 * [`@ekc0106`](https://github.com/ekc0106)
+
 -----------------
 
 **Submitted**
